@@ -20,9 +20,8 @@ redis_app_cache_hit = Counter(
 )
 
 redis_app_cache_miss = Counter(
-    "redis_app_cache_miss",
-    "Number of cache misses when getting items from Redis",
-    ["key"],
+    'redis_app_cache_miss',
+    "Number of cache missed when getting items from Redis",
 )
 
 request_count = Counter(
@@ -111,13 +110,13 @@ def get_item(key):
     try:
         value = redis_client.get(key)
         if value is None:
-            redis_app_cache_miss.labels(key=key).inc()
+            redis_app_cache_miss.inc()
             return jsonify({"error": "Key not found"}), 404
 
         # Increment cache hit counter
         redis_app_cache_hit.labels(key=key).inc()
         return jsonify({"key": key, "value": value})
-        
+
     except redis.ConnectionError:
         return jsonify({"error": "Cannot connect to Redis"}), 503
     except Exception as e:
@@ -152,6 +151,6 @@ def metrics():
 if __name__ == "__main__":
     app.run(
         host=os.getenv("FLASK_BIND_HOST", "0.0.0.0"),
-        port=int(os.getenv("FLASK_PORT", 9000)),
+        port=int(os.getenv("FLASK_PORT", 5000)),
         debug=True,
     )
